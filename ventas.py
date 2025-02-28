@@ -30,8 +30,17 @@ class Ventas(tk.Frame):
         
         label_nombre = tk.Label(lblframe, text="productos: ", bg="#C6D9E3", font="sans 14 bold")
         label_nombre.place(x=240, y=12)
-        
-        self.entry_nombre = tk.Entry(lblframe, font="sans 14 bold")
+        self.entry_nombre = ttk.Entry(lblframe, font="sans 14 bold")
         self.entry_nombre.place(x=360, y=10, width=180)
+        
+        label_valor = tk.Label(lblframe, text="Precio: ",bg="#C6D9E3", font="sans 14 bold")
+        label_valor.place(x=550, y=12)
+        self.entry_valor = ttk.Entry(lblframe, font="sans 14 bold")
+        self.entry_valor.place(x=630, y=10, width=180)
+        
+        label_cantidad = tk.Label(lblframe, text="Cantidad: ",bg="#C6D9E3", font="sans 14 bold")
+        label_cantidad.place(x=820, y=12)
+        self.entry_cantidad = ttk.Entry(lblframe, font="sans 14 bold")
+        self.entry_cantidad.place(x=920, y=10)
         
         
