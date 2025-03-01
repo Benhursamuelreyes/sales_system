@@ -43,4 +43,27 @@ class Ventas(tk.Frame):
         self.entry_cantidad = ttk.Entry(lblframe, font="sans 14 bold")
         self.entry_cantidad.place(x=920, y=10)
         
+        treFrame = tk.Frame(frame2, bg="#C6D9E3")
+        treFrame.place(x=1500, y=120, width=800, height=200)
         
+        scrol_y = ttk.Scrollbar(treFrame, orient=VERTICAL)
+        scrol_y.pack(side=RIGHT, fill=Y)
+        
+        scrol_x = ttk.Scrollbar(treFrame, orient=HORIZONTAL)
+        scrol_x.pack(side=BOTTOM, fill=X)
+        
+        self.tree = ttk.Treeview(treFrame, columns=("producto", "Precio", "Cantidad","Subtotal"), show="headings", height=10, yscrollcommand=scrol_y.set, xscrollcommand=scrol_x.set)
+        scrol_y.config(command=self.tree.yview)
+        scrol_x.config(command=self.tree.xview)
+        
+        self.tree.heading("#1", text="producto")
+        self.tree.heading("#2", text="pPrecio")
+        self.tree.heading("#3", text="Cantidad")
+        self.tree.heading("#4", text="Subtotal")
+        
+        self.tree.column("producto", anchor="center")
+        self.tree.column("Precio", anchor="center")
+        self.tree.column("Cantidad", anchor="center")
+        self.tree.column("Subtotal", anchor="center")
+        
+        self.tree.pack(expand=True, fill=BOTH)
