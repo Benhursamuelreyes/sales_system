@@ -38,13 +38,13 @@ class Ventas(tk.Frame):
         self.entry_valor = ttk.Entry(lblframe, font="sans 14 bold")
         self.entry_valor.place(x=630, y=10, width=180)
         
-        label_cantidad = tk.Label(lblframe, text="Cantidad: ",bg="#C6D9E3", font="sans 14 bold")
+        label_cantidad = tk.Label(lblframe, text="Cantidad: ", bg="#C6D9E3", font="sans 14 bold")
         label_cantidad.place(x=820, y=12)
         self.entry_cantidad = ttk.Entry(lblframe, font="sans 14 bold")
         self.entry_cantidad.place(x=920, y=10)
         
         treFrame = tk.Frame(frame2, bg="#C6D9E3")
-        treFrame.place(x=1500, y=120, width=800, height=200)
+        treFrame.place(x=150, y=120, width=800, height=200)
         
         scrol_y = ttk.Scrollbar(treFrame, orient=VERTICAL)
         scrol_y.pack(side=RIGHT, fill=Y)
@@ -57,7 +57,7 @@ class Ventas(tk.Frame):
         scrol_x.config(command=self.tree.xview)
         
         self.tree.heading("#1", text="producto")
-        self.tree.heading("#2", text="pPrecio")
+        self.tree.heading("#2", text="Precio")
         self.tree.heading("#3", text="Cantidad")
         self.tree.heading("#4", text="Subtotal")
         
@@ -67,3 +67,15 @@ class Ventas(tk.Frame):
         self.tree.column("Subtotal", anchor="center")
         
         self.tree.pack(expand=True, fill=BOTH)
+        
+        lblframe1 = LabelFrame(frame2, text="Opciones", bg="#C6D9E3", font="sans 14 bold")
+        lblframe1.place(x=10, y=380, width=1060, height=100)
+        
+        boton_agregar = tk.Button(lblframe1, text="Agregar articulo", bg="#dddddd", font="sans 14 bold")
+        boton_agregar.place(x=50, y=10, width=240, height=50)
+        
+        boton_pagar = tk.Button(lblframe1, text="Pagar", bg="#dddddd", font="sans 14 bold")
+        boton_pagar.place(x=400, y=10,width=240, height=50)
+        
+        boton_ver_factura = tk.Button(lblframe1, text="Ver Factura", bg="#dddddd", font="sans 14 bold")
+        boton_ver_factura.place(x=750, y=10, width=240, height=50)
