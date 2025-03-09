@@ -1,8 +1,13 @@
+import mysql
 from tkinter import *
 from tkinter import ttk, messagebox
 import tkinter as tk
 
+import mysql.connector
+
 class Ventas(tk.Frame):
+    db_name = "database.sql"
+    
     def __init__(self, parent):
         super().__init__(parent)
         self.widgets()
@@ -11,6 +16,7 @@ class Ventas(tk.Frame):
         frame1 = tk.Frame(self, bg="#dddddd", highlightbackground="gray", highlightthickness=3)
         frame1.pack()
         frame1.place(x=0, y=0, width=1100, height=100)
+        
         titulo = tk.Label(self, text="VENTAS", bg="#dddddd", font="sans 30 bold", anchor="center")
         titulo.pack()
         titulo.place(x=5, y=0, width=1090,height=90)
@@ -30,13 +36,17 @@ class Ventas(tk.Frame):
         
         label_nombre = tk.Label(lblframe, text="productos: ", bg="#C6D9E3", font="sans 14 bold")
         label_nombre.place(x=240, y=12)
-        self.entry_nombre = ttk.Entry(lblframe, font="sans 14 bold")
+        self.entry_nombre = ttk.Combobox(lblframe, font="sans 14 bold", state="readonly")
         self.entry_nombre.place(x=360, y=10, width=180)
+        
+        self.cargar_productos()
         
         label_valor = tk.Label(lblframe, text="Precio: ",bg="#C6D9E3", font="sans 14 bold")
         label_valor.place(x=550, y=12)
-        self.entry_valor = ttk.Entry(lblframe, font="sans 14 bold")
+        self.entry_valor = ttk.Entry(lblframe, font="sans 14 bold", state="readonly")
         self.entry_valor.place(x=630, y=10, width=180)
+        
+        self.entry_nombre.bind("<<ComboboxSelected>>", self.actualizar_precio)
         
         label_cantidad = tk.Label(lblframe, text="Cantidad: ", bg="#C6D9E3", font="sans 14 bold")
         label_cantidad.place(x=820, y=12)
@@ -79,3 +89,94 @@ class Ventas(tk.Frame):
         
         boton_ver_factura = tk.Button(lblframe1, text="Ver Factura", bg="#dddddd", font="sans 14 bold")
         boton_ver_factura.place(x=750, y=10, width=240, height=50)
+        
+        self.label_suma_total = tk.Label(frame2, text="Total a pagar: 0 €", bg="#C6D9E3", font="sans 25 bold")
+        self.label_suma_total.place(x=360, y=335)
+        
+    def cargar_productos(self):
+        try:
+            conn = mysql.connector.connect(self.db_name)
+            c = conn.cursor()
+            c.execute("SELECT nombre FROM inventario")
+            productos = c.fetchall()
+            self.entry_nombre["values"] = [producto[0] for producto in productos]
+            if not productos:
+                print("No se encontraron productos en la base de datos")
+            conn.close()
+        except mysql.connector.Error as e:
+            print("Error al cargar productos desde la base de datos", e)
+    
+    def actualizar_precio(self, event):
+        nombre_producto = self.entry_nombre.get()
+        try:
+            conn = mysql.connector.connect(self.db_name)
+            c = conn.cursor()
+            c.execute("SELECT precio FROM inventario WHERE nombre = ?", (nombre_producto))
+            precio = c.fetchone()
+            if (precio):
+                self.entry_valor.config(state="normal")
+                self.entry_valor.delete(0, tk.END)
+                self.entry_valor.insert(0, precio[0])
+                self.entry_valor.config(state="readonly")
+            else:
+                self.entry_valor.config(state="normal")
+                self.entry_valor.delete(0, tk.END)
+                self.entry_valor.insert(0, "Precio no dispomible")
+                self.entry_valor.config(state="readonly")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Error", f"Error al obtener el precio: {e}")
+        finally:
+            conn.close()
+    
+    def actualizar_total(self):
+        total = 0.0
+        for child in self.tree.get_children():
+            subtotal = float(self.tree.item(child, "values") [3])
+            total += subtotal
+        self.label_suma_total.config(text="Total a pagar: {total:.0f} €")
+        
+    def registrar(self):
+        producto = self.entry_nombre.get()
+        precio = self.entry_valor.get()
+        cantidad = self.entry_cantidad.get()
+        if producto and precio and cantidad:
+            try:
+                cantidad = int(cantidad)
+                if not self.validar_stock(producto, cantidad):
+                    messagebox.showerror("Error", "stock insuficiente para el producto seleccionado")
+                    return
+                precio = float(precio)
+                subtotal = cantidad * precio
+                self.tree.insert("", "end", values=(producto, f"{precio:.0f}", cantidad, f"{subtotal:.0f}"))
+                self.entry_nombre.set("")
+                self.entry_valor.config(state="normal")
+                self.entry_valor.delete(0, tk.END)
+                self.entry_valor.config(state="readonly")
+                self.entry_cantidad.delete(0, tk.END)
+                self.actualizar_total()
+            except ValueError:
+                messagebox.showerror("Error", "Cantidad o precio no validos")
+        else:
+            messagebox.showerror("Error", "Debe completar ttodos los campos")
+    
+    def validar_stock(self, nombre_producto, cantidad):
+        try:
+            conn = mysql.connector.connect(self.db_name)
+            c = conn.cursor()
+            c.execute("SELECT stock FROM inventario WHERE nombre = ?", (nombre_producto))
+            stock = c.fetchone()
+            if stock and stock[0] >= cantidad:
+                return True
+            return False
+        except mysql.connector.Error as e:
+            messagebox.showerror("Error", f"Error al validar el stock: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def obtener_total(self):
+        total = 0.0
+        for child in self.tree.get_children():
+            subtotal = float(self.tree.item(child, "values") [3])
+            total += subtotal
+        return total
